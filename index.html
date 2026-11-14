@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RMIK SPACE - Try Out UKOM</title>
+  <script>
+    try {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+      }
+      if (window.caches) caches.keys().then(n => n.forEach(c => caches.delete(c)));
+    } catch(e){}
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <style>
+    .unselectable { -webkit-user-select:none; user-select:none; }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:#0f172a; } ::-webkit-scrollbar-thumb { background:#334155; border-radius:4px; }
+    .num-btn { background:#f8fafc!important; color:#0f172a!important; font-weight:800!important; border:2px solid #cbd5e1!important; }
+    .num-btn.answered { background:#10b981!important; color:#fff!important; border-color:#059669!important; }
+    .num-btn.ragu { background:#f59e0b!important; color:#fff!important; border-color:#d97706!important; }
+    .num-btn.active { border-color:#0284c7!important; transform:scale(1.05); }
+    #calc-fab-btn { position:fixed!important; bottom:25px!important; right:25px!important; z-index:999999!important; }
+    body.light-mode { background:#f8fafc!important; color:#0f172a!important; }
+    body.light-mode header, body.light-mode section, body.light-mode aside, body.light-mode .bg-slate-900 { background:#fff!important; border-color:#e2e8f0!important; color:#0f172a!important; }
+    body.light-mode .text-white { color:#0f172a!important; }
+    body.light-mode .text-slate-100, body.light-mode .text-slate-200, body.light-mode .text-slate-300, body.light-mode .text-slate-400 { color:#334155!important; }
+    body.light-mode input, body.light-mode textarea, body.light-mode .bg-slate-800, body.light-mode .bg-slate-950\/60 { background:#f1f5f9!important; border-color:#cbd5e1!important; color:#0f172a!important; }
+    .star-rating { display:inline-flex; gap:4px; cursor:pointer; }
+    .star-rating i { font-size:1.35rem; color:#475569; transition:color .15s; }
+    .star-rating i.active { color:#f59e0b; }
+    .exam-card { transition: all .2s; }
+    .exam-card:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans unselectable">
+
+<!-- HEADER -->
+<header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="handleSecretTrigger()">
+      <div class="bg-gradient-to-br from-sky-600 to-blue-800 p-2 rounded-xl text-white flex items-center justify-center w-10 h-10 shadow-lg">
+        <span class="font-black text-lg">R</span>
+      </div>
+      <div>
+        <h1 class="font-bold text-base md:text-lg text-white leading-tight">RMIK SPACE</h1>
+        <p class="text-xs text-sky-400 font-medium" id="header-subtitle">Try Out UKOM RMIK & MIK</p>
+      </div>
+    </div>
+    <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-800 border border-slate-700 text-amber-400 text-xs font-bold flex items-center gap-2 px-3">
+      <i id="theme-toggle-icon" class="fa-solid fa-sun text-sm"></i>
+      <span id="theme-toggle-text">Mode Terang</span>
+    </button>
+  </div>
+</header>
+
+<main class="flex-grow max-w-7xl w-full mx-auto p-3 sm:p-5 flex flex-col justify-center">
+
+  <!-- ==================== LOGIN ==================== -->
+  <section id="page-login" class="max-w-md w-full mx-auto bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-800 shadow-2xl">
+    <div class="text-center mb-6">
+      <h2 class="text-2xl font-bold text-white">Selamat Datang</h2>
+      <p class="text-xs text-slate-400 mt-1">Masukkan Nama, NIM, dan Token Ujian</p>
+    </div>
+    <div id="login-status-msg" class="hidden text-xs font-semibold p-3 rounded-xl mb-4 text-center border"></div>
+    <form onsubmit="handleLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Lengkap</label>
+        <input type="text" id="login-name" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500" placeholder="Nama Lengkap">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">NIM</label>
+        <input type="text" id="login-nim" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500" placeholder="Nomor Induk Mahasiswa">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Token Ujian (Global)</label>
+        <input type="text" id="login-token" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white font-mono tracking-wider focus:outline-none focus:border-sky-500" placeholder="Token">
+      </div>
+      <button type="submit" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg text-sm flex items-center justify-center gap-2">
+        <span>Masuk</span> <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </form>
+  </section>
+
+  <!-- ==================== DAFTAR UJIAN ==================== -->
+  <section id="page-exam-list" class="w-full hidden">
+    <div class="mb-6 text-center">
+      <h2 class="text-xl font-bold text-white">Daftar Ujian Tersedia</h2>
+      <p class="text-xs text-slate-400 mt-1">Pilih ujian sesuai program studi Anda</p>
+      <div class="mt-2 text-xs text-sky-400" id="participant-info-bar">-</div>
+    </div>
+    <div id="exam-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+      <!-- cards injected here -->
+    </div>
+    <div class="text-center mt-8">
+      <button onclick="logoutParticipant()" class="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl">Keluar</button>
+    </div>
+  </section>
+
+  <!-- ==================== TATA TERTIB + TOMBOL MULAI (TIMED) ==================== -->
+  <section id="page-rules" class="max-w-2xl w-full mx-auto bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-800 shadow-2xl space-y-6 hidden">
+    <div class="border-b border-slate-800 pb-3 flex items-center gap-3">
+      <i class="fa-solid fa-shield-cat text-2xl text-amber-400"></i>
+      <div>
+        <h2 class="text-lg font-bold text-white" id="rules-exam-title">Tata Tertib Ujian</h2>
+        <p class="text-xs text-slate-400">Bacalah dengan seksama sebelum memulai</p>
+      </div>
+    </div>
+    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-2.5 leading-relaxed">
+      <ul class="list-disc pl-5 space-y-2">
+        <li>Jawaban tersimpan <strong>otomatis real-time</strong> setiap kali Anda memilih opsi.</li>
+        <li>Dilarang berpindah tab / membuka aplikasi lain (tercatat sebagai pelanggaran).</li>
+        <li>Akumulasi pelanggaran mencapai batas maksimal akan mengunci ujian secara otomatis.</li>
+        <li>Waktu berjalan berdasarkan jadwal global. Keterlambatan mengurangi sisa waktu.</li>
+        <li>Setelah masuk ruang ujian, Anda tidak dapat kembali ke daftar ujian kecuali diizinkan Admin.</li>
+      </ul>
+    </div>
+    <div class="p-3.5 bg-sky-950/40 border border-sky-800 rounded-xl text-xs text-sky-300 flex justify-between items-center">
+      <div>
+        <span class="block text-[10px] text-sky-400 uppercase font-bold">Peserta</span>
+        <span id="rules-verified-info" class="font-bold text-white">-</span>
+      </div>
+      <span id="rules-program-badge" class="bg-sky-800 px-2.5 py-1 rounded-lg text-[11px] font-bold text-white">-</span>
+    </div>
+
+    <!-- COUNTDOWN & BUTTON -->
+    <div class="text-center space-y-3">
+      <div id="rules-countdown-box" class="text-sm font-mono text-amber-400">
+        <i class="fa-regular fa-clock mr-1"></i> <span id="rules-countdown-text">Memuat waktu server...</span>
+      </div>
+      <button id="btn-start-exam" onclick="startActualExam()" disabled
+        class="w-full py-3.5 bg-slate-700 text-slate-400 font-bold rounded-xl shadow text-sm flex items-center justify-center gap-2 cursor-not-allowed transition">
+        <i class="fa-solid fa-lock"></i> <span id="btn-start-label">Menunggu Waktu Mulai</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ==================== RUANG UJIAN ==================== -->
+  <section id="page-exam" class="w-full hidden">
+    <div class="w-full bg-slate-900 border-2 border-sky-500/50 rounded-2xl p-4 mb-4 text-center shadow-xl">
+      <span class="text-[11px] font-bold text-sky-400 uppercase tracking-widest block mb-1">
+        <i class="fa-regular fa-clock mr-1"></i> Sisa Waktu
+      </span>
+      <div id="countdown-timer" class="text-4xl sm:text-5xl font-black font-mono tracking-wider text-amber-400">00:00:00</div>
+      <div id="auto-save-indicator" class="text-[10px] text-emerald-400 mt-1 hidden"><i class="fa-solid fa-cloud-arrow-up"></i> Tersimpan</div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-8 space-y-4">
+        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+          <div class="flex items-center space-x-2">
+            <span class="w-8 h-8 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center" id="user-avatar">U</span>
+            <div>
+              <h3 class="font-bold text-white text-sm" id="user-display-name">-</h3>
+              <p class="text-slate-400 text-[10px]" id="user-display-nim">-</p>
+            </div>
+          </div>
+          <div class="bg-red-950/50 border border-red-800 px-3 py-1 rounded-lg text-red-400 font-bold text-[11px]">
+            Pelanggaran: <span id="cheat-counter">0/3</span>
+          </div>
+        </div>
+        <div class="bg-slate-900 p-5 sm:p-7 rounded-2xl border border-slate-800 shadow-lg space-y-4">
+          <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+            <span class="text-[11px] bg-sky-950 text-sky-300 border border-sky-800 font-bold px-3 py-1 rounded-full">
+              SOAL <span id="current-question-num-lbl">1</span> / <span id="total-questions-lbl">0</span>
+            </span>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" id="doubt-checkbox" onchange="toggleDoubt()" class="w-4 h-4 text-amber-500 rounded">
+              <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-flag"></i> Ragu</span>
+            </label>
+          </div>
+          <div class="text-xs font-bold text-sky-400" id="question-category-lbl">Kategori: -</div>
+          <p id="question-text" class="text-base sm:text-lg font-medium leading-relaxed text-slate-100">Memuat...</p>
+          <div id="options-container" class="space-y-3 pt-1"></div>
+        </div>
+        <div class="flex justify-between items-center bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+          <button id="btn-prev" onclick="navigateQuestion(-1)" class="px-4 py-2 bg-slate-800 text-slate-200 text-xs font-bold rounded-lg"><i class="fa-solid fa-chevron-left"></i> Kembali</button>
+          <button id="btn-submit" onclick="showConfirmSubmit()" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hidden"><i class="fa-solid fa-circle-check"></i> Selesai</button>
+          <button id="btn-next" onclick="navigateQuestion(1)" class="px-4 py-2 bg-sky-600 text-white text-xs font-bold rounded-lg">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+      </div>
+      <aside class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl lg:sticky lg:top-20">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-3">
+          <span class="font-bold text-xs text-white uppercase"><i class="fa-solid fa-border-all text-sky-400 mr-1"></i> Rak Jawaban</span>
+        </div>
+        <div id="questions-grid" class="grid grid-cols-5 gap-2 max-h-[420px] overflow-y-auto pr-1"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ==================== HASIL + SURVEY ==================== -->
+  <section id="page-result" class="max-w-lg w-full mx-auto bg-slate-900 p-8 rounded-2xl border border-slate-800 text-center shadow-2xl hidden">
+    <div id="result-icon-container" class="w-16 h-16 bg-emerald-950 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <h2 id="result-main-title" class="text-2xl font-bold text-white mb-1">Jawaban Diterima</h2>
+    <p id="result-main-desc" class="text-xs text-slate-400 mb-6">Data telah tersimpan aman.</p>
+    <div class="p-4 bg-slate-800/60 rounded-xl border border-slate-800 text-left mb-6 text-xs text-slate-300 space-y-1.5">
+      <div><strong class="text-slate-400">Peserta:</strong> <span id="res-user-name" class="font-bold text-white">-</span></div>
+      <div><strong class="text-slate-400">NIM:</strong> <span id="res-user-nim" class="font-bold text-sky-400">-</span></div>
+      <div><strong class="text-slate-400">Waktu:</strong> <span id="res-user-time" class="text-slate-200">-</span></div>
+      <div><strong class="text-slate-400">Status:</strong> <span id="res-user-status" class="text-emerald-400 font-bold">Sukses</span></div>
+    </div>
+    <div id="survey-section" class="text-left space-y-4 mb-6 p-4 bg-slate-800/40 rounded-xl border border-slate-700">
+      <h3 class="text-sm font-bold text-amber-400"><i class="fa-solid fa-star"></i> Survey Pengalaman (Wajib)</h3>
+      <div class="space-y-3 text-xs">
+        <div><label class="block text-slate-300 mb-1">Overall</label><div class="star-rating" data-rating="overall"><i class="fa-solid fa-star" data-value="1"></i><i class="fa-solid fa-star" data-value="2"></i><i class="fa-solid fa-star" data-value="3"></i><i class="fa-solid fa-star" data-value="4"></i><i class="fa-solid fa-star" data-value="5"></i></div></div>
+        <div><label class="block text-slate-300 mb-1">Tampilan UI</label><div class="star-rating" data-rating="ui"><i class="fa-solid fa-star" data-value="1"></i><i class="fa-solid fa-star" data-value="2"></i><i class="fa-solid fa-star" data-value="3"></i><i class="fa-solid fa-star" data-value="4"></i><i class="fa-solid fa-star" data-value="5"></i></div></div>
+        <div><label class="block text-slate-300 mb-1">Kualitas Soal</label><div class="star-rating" data-rating="soal"><i class="fa-solid fa-star" data-value="1"></i><i class="fa-solid fa-star" data-value="2"></i><i class="fa-solid fa-star" data-value="3"></i><i class="fa-solid fa-star" data-value="4"></i><i class="fa-solid fa-star" data-value="5"></i></div></div>
+        <div><label class="block text-slate-300 mb-1">Keamanan</label><div class="star-rating" data-rating="keamanan"><i class="fa-solid fa-star" data-value="1"></i><i class="fa-solid fa-star" data-value="2"></i><i class="fa-solid fa-star" data-value="3"></i><i class="fa-solid fa-star" data-value="4"></i><i class="fa-solid fa-star" data-value="5"></i></div></div>
+        <div><label class="block text-slate-300 mb-1">Saran (opsional)</label><textarea id="survey-saran" rows="2" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"></textarea></div>
+      </div>
+    </div>
+    <button onclick="submitSurveyAndLogout()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl">Kirim Survey & Keluar</button>
+  </section>
+
+  <!-- ==================== ADMIN LOGIN ==================== -->
+  <section id="page-admin-login" class="max-w-md w-full mx-auto bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-800 shadow-2xl hidden">
+    <div class="text-center mb-6">
+      <i class="fa-solid fa-shield-halved text-3xl text-amber-400 mb-2"></i>
+      <h2 class="text-xl font-bold text-white">Login Administrator</h2>
+    </div>
+    <div id="admin-login-status-msg" class="hidden text-xs font-semibold p-3 rounded-xl mb-4 text-center border"></div>
+    <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+      <div><label class="block text-xs font-semibold text-slate-300 mb-1">Username</label><input type="text" id="admin-user" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white"></div>
+      <div><label class="block text-xs font-semibold text-slate-300 mb-1">Password</label><input type="password" id="admin-pass" required class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white"></div>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="goToPage('login')" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Batal</button>
+        <button type="submit" class="w-1/2 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-bold">Masuk</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ==================== ADMIN DASHBOARD ==================== -->
+  <section id="page-admin" class="w-full bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-2xl hidden space-y-6">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+      <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-sliders text-amber-400"></i> Dashboard Admin RMIK SPACE</h2>
+      <button onclick="goToPage('login')" class="px-3 py-1.5 bg-slate-800 text-slate-300 text-xs font-bold rounded-lg">Keluar</button>
+    </div>
+    <div id="admin-toast-msg" class="hidden text-xs font-bold p-3 rounded-xl border text-center"></div>
+
+    <!-- GLOBAL TOKEN -->
+    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-800 space-y-3">
+      <h3 class="text-xs font-bold text-sky-400 uppercase">Token Global & Konfigurasi</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div><label class="block text-[11px] text-slate-400 mb-1">Token Global</label><input type="text" id="cfg-global-token" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white font-mono"></div>
+        <div class="flex items-end"><button onclick="saveGlobalConfig()" class="w-full py-2 bg-sky-600 text-white text-xs font-bold rounded-lg">Simpan Token</button></div>
+      </div>
+    </div>
+
+    <!-- KELOLA UJIAN -->
+    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-800 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-xs font-bold text-indigo-400 uppercase"><i class="fa-solid fa-layer-group mr-1"></i> Kelola Ujian</h3>
+        <button onclick="showCreateExamForm()" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg">+ Buat Ujian Baru</button>
+      </div>
+      <div id="create-exam-form" class="hidden p-4 bg-slate-900 rounded-xl border border-slate-700 space-y-3">
+        <input type="hidden" id="edit-exam-id">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label class="text-[11px] text-slate-400">Judul Ujian</label><input id="exam-title" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white"></div>
+          <div><label class="text-[11px] text-slate-400">Target Program</label>
+            <select id="exam-target" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white">
+              <option value="D3_RMIK">D3 RMIK saja</option>
+              <option value="D4_MIK">D4 MIK saja</option>
+              <option value="ALL">Semua (D3 & D4)</option>
+            </select>
+          </div>
+          <div><label class="text-[11px] text-slate-400">Tanggal Mulai (WIB)</label><input type="date" id="exam-start-date" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white"></div>
+          <div><label class="text-[11px] text-slate-400">Jam Mulai (WIB)</label><input type="time" id="exam-start-time" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white"></div>
+          <div><label class="text-[11px] text-slate-400">Durasi (menit)</label><input type="number" id="exam-duration" value="180" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white"></div>
+          <div><label class="text-[11px] text-slate-400">Maks Pelanggaran</label><input type="number" id="exam-max-viol" value="3" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white"></div>
+        </div>
+        <div><label class="text-[11px] text-slate-400">Deskripsi singkat</label><textarea id="exam-desc" rows="2" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white"></textarea></div>
+        <div class="flex gap-2">
+          <button onclick="saveExam()" class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg">Simpan Ujian</button>
+          <button onclick="hideCreateExamForm()" class="px-4 py-2 bg-slate-700 text-slate-300 text-xs font-bold rounded-lg">Batal</button>
+        </div>
+      </div>
+      <div id="admin-exam-list" class="space-y-2 text-xs"></div>
+    </div>
+
+    <!-- WHITELIST D3 & D4 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-800 space-y-3">
+        <h3 class="text-xs font-bold text-emerald-400 uppercase">Whitelist D3 RMIK</h3>
+        <textarea id="wl-d3" rows="4" class="w-full p-2 font-mono text-xs bg-slate-900 border border-slate-700 rounded-lg text-slate-200" placeholder="NIM dipisah koma atau baris baru"></textarea>
+        <button onclick="saveWhitelist('D3')" class="w-full py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg">Simpan Whitelist D3</button>
+      </div>
+      <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-800 space-y-3">
+        <h3 class="text-xs font-bold text-amber-400 uppercase">Whitelist D4 MIK</h3>
+        <textarea id="wl-d4" rows="4" class="w-full p-2 font-mono text-xs bg-slate-900 border border-slate-700 rounded-lg text-slate-200" placeholder="NIM dipisah koma atau baris baru"></textarea>
+        <button onclick="saveWhitelist('D4')" class="w-full py-2 bg-amber-600 text-white text-xs font-bold rounded-lg">Simpan Whitelist D4</button>
+      </div>
+    </div>
+
+    <!-- BANK SOAL PER UJIAN -->
+    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-800 space-y-4">
+      <h3 class="text-xs font-bold text-purple-400 uppercase"><i class="fa-solid fa-database mr-1"></i> Bank Soal per Ujian</h3>
+      <div class="flex flex-wrap gap-2 items-center">
+        <select id="qbank-exam-select" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"></select>
+        <button onclick="loadQuestionBank()" class="px-3 py-2 bg-sky-600 text-white text-xs font-bold rounded-lg">Muat Soal</button>
+      </div>
+      <textarea id="ai-import-area" rows="5" class="w-full p-3 font-mono text-xs bg-slate-900 border border-slate-700 rounded-xl text-slate-200" placeholder="Format:&#10;1. Soal...&#10;A. ...&#10;B. ...&#10;Kunci: A&#10;Kategori: ..."></textarea>
+      <div class="flex gap-2">
+        <button onclick="processAIImport()" class="px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-lg">Inject Soal ke Ujian Terpilih</button>
+        <button onclick="clearQuestionBank()" class="px-4 py-2 bg-red-800 text-white text-xs font-bold rounded-lg">Hapus Semua Soal Ujian Ini</button>
+      </div>
+      <div id="bank-soal-preview" class="max-h-48 overflow-y-auto text-xs text-slate-400 space-y-1"></div>
+    </div>
+
+    <!-- SESI REAL-TIME -->
+    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-800 space-y-4">
+      <div class="flex flex-wrap justify-between items-center gap-2">
+        <h3 class="text-xs font-bold text-emerald-400 uppercase"><i class="fa-solid fa-users mr-1"></i> Sesi Real-Time</h3>
+        <div class="flex gap-2">
+          <select id="session-exam-filter" class="px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-white"></select>
+          <button onclick="loadAdminSessions(true)" class="px-3 py-1.5 bg-sky-600 text-white text-xs font-bold rounded-lg"><i class="fa-solid fa-rotate"></i> Muat Ulang</button>
+          <button onclick="hardResetSessions()" class="px-3 py-1.5 bg-red-800 text-white text-xs font-bold rounded-lg">Hard Reset Sesi</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+            <tr><th class="p-2">NIM</th><th class="p-2">Nama</th><th class="p-2">Ujian</th><th class="p-2">Status</th><th class="p-2">Progress</th><th class="p-2">Sisa</th><th class="p-2">Aksi</th></tr>
+          </thead>
+          <tbody id="admin-sessions-tbody" class="divide-y divide-slate-800"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FLOATING CALC -->
+<button id="calc-fab-btn" onclick="openCalculator()" class="bg-sky-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-2xl hidden border-2 border-white/20">
+  <i class="fa-solid fa-calculator"></i>
+</button>
+
+<!-- MODALS -->
+<div id="calculator-modal" class="fixed inset-0 bg-black/70 z-[9999999] flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border border-slate-800 max-w-xs w-full p-4 rounded-2xl space-y-3">
+    <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+      <span class="text-xs font-bold text-sky-400">Kalkulator</span>
+      <button onclick="closeCalculator()" class="text-slate-400 text-lg">&times;</button>
+    </div>
+    <div id="calc-display" class="bg-slate-950 p-3 rounded-xl text-right font-mono text-2xl font-bold text-amber-400">0</div>
+    <div class="grid grid-cols-4 gap-1.5 text-xs font-bold">
+      <button onclick="calcClear()" class="p-3 bg-red-950/60 text-red-400 rounded-lg">C</button>
+      <button onclick="calcAppend('(')" class="p-3 bg-slate-800 rounded-lg">(</button>
+      <button onclick="calcAppend(')')" class="p-3 bg-slate-800 rounded-lg">)</button>
+      <button onclick="calcAppend('/')" class="p-3 bg-sky-950 text-sky-400 rounded-lg">÷</button>
+      <button onclick="calcAppend('7')" class="p-3 bg-slate-800 rounded-lg">7</button>
+      <button onclick="calcAppend('8')" class="p-3 bg-slate-800 rounded-lg">8</button>
+      <button onclick="calcAppend('9')" class="p-3 bg-slate-800 rounded-lg">9</button>
+      <button onclick="calcAppend('*')" class="p-3 bg-sky-950 text-sky-400 rounded-lg">×</button>
+      <button onclick="calcAppend('4')" class="p-3 bg-slate-800 rounded-lg">4</button>
+      <button onclick="calcAppend('5')" class="p-3 bg-slate-800 rounded-lg">5</button>
+      <button onclick="calcAppend('6')" class="p-3 bg-slate-800 rounded-lg">6</button>
+      <button onclick="calcAppend('-')" class="p-3 bg-sky-950 text-sky-400 rounded-lg">-</button>
+      <button onclick="calcAppend('1')" class="p-3 bg-slate-800 rounded-lg">1</button>
+      <button onclick="calcAppend('2')" class="p-3 bg-slate-800 rounded-lg">2</button>
+      <button onclick="calcAppend('3')" class="p-3 bg-slate-800 rounded-lg">3</button>
+      <button onclick="calcAppend('+')" class="p-3 bg-sky-950 text-sky-400 rounded-lg">+</button>
+      <button onclick="calcAppend('0')" class="p-3 bg-slate-800 col-span-2 rounded-lg">0</button>
+      <button onclick="calcDelete()" class="p-3 bg-amber-950/60 text-amber-400 rounded-lg">DEL</button>
+      <button onclick="calcCalculate()" class="p-3 bg-sky-600 text-white rounded-lg">=</button>
+    </div>
+  </div>
+</div>
+
+<div id="violation-modal" class="fixed inset-0 bg-black/80 z-[9999999] flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border-2 border-red-600 max-w-sm w-full p-6 rounded-2xl text-center space-y-4">
+    <div class="w-14 h-14 bg-red-950 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h3 class="text-lg font-bold text-white">Pelanggaran Terdeteksi</h3>
+    <p class="text-xs text-slate-300">Anda meninggalkan layar ujian.</p>
+    <div class="bg-red-950/60 border border-red-800 p-2.5 rounded-xl text-xs text-red-300 font-bold">Ke-<span id="violation-modal-count">1</span> dari <span id="violation-modal-max">3</span></div>
+    <button onclick="acknowledgeViolation()" class="w-full py-2.5 bg-red-600 text-white font-bold text-xs rounded-xl">Saya Mengerti</button>
+  </div>
+</div>
+
+<div id="confirm-submit-modal" class="fixed inset-0 bg-black/80 z-[9999999] flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border border-slate-700 max-w-sm w-full p-6 rounded-2xl text-center space-y-4">
+    <h3 class="text-lg font-bold text-white">Selesai Ujian?</h3>
+    <p class="text-xs text-slate-300">Jawaban tidak dapat diubah setelah dikirim.</p>
+    <div class="flex gap-2">
+      <button onclick="closeSubmitConfirm()" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Batal</button>
+      <button onclick="forceFinishExam(false)" class="w-1/2 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold">Kirim Sekarang</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   CONFIG - GANTI URL INI
+===================================================== */
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec"; // <<< GANTI!
+const ADMIN_CREDENTIALS = { username: "admin", password: "rmik2026" }; // <<< GANTI PASSWORD
+
+/* =====================================================
+   STATE
+===================================================== */
+let appState = {
+  currentPage: "login",
+  globalToken: "UKOM2026",
+  exams: [],
+  whitelistD3: [],
+  whitelistD4: [],
+  currentUser: null,
+  currentExam: null,
+  sessionQuestions: [],
+  userAnswers: {},
+  currentQuestionIndex: 0,
+  timeRemaining: 0,
+  timerInterval: null,
+  rulesCountdownInterval: null,
+  isExamRunning: false,
+  cheatWarnings: 0,
+  secretClickCount: 0,
+  serverOffset: 0,
+  sessionId: null,
+  saveTimeout: null,
+  surveyRatings: { overall:0, ui:0, soal:0, keamanan:0 }
+};
+
+/* =====================================================
+   INIT
+===================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  loadTheme();
+  setupStarRatings();
+  setupAntiCheat();
+  fetchConfig();
+});
+
+/* =====================================================
+   THEME & UTIL
+===================================================== */
+function toggleTheme() {
+  document.body.classList.toggle("light-mode");
+  const isLight = document.body.classList.contains("light-mode");
+  localStorage.setItem("RMIK_THEME", isLight ? "light" : "dark");
+  document.getElementById("theme-toggle-icon").className = isLight ? "fa-solid fa-moon text-sm text-sky-400" : "fa-solid fa-sun text-sm";
+  document.getElementById("theme-toggle-text").innerText = isLight ? "Mode Gelap" : "Mode Terang";
+}
+function loadTheme() {
+  if (localStorage.getItem("RMIK_THEME") === "light") {
+    document.body.classList.add("light-mode");
+    document.getElementById("theme-toggle-icon").className = "fa-solid fa-moon text-sm text-sky-400";
+    document.getElementById("theme-toggle-text").innerText = "Mode Gelap";
+  }
+}
+function showToast(id, text, ok=false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerText = text;
+  el.className = `text-xs font-semibold p-3 rounded-xl mb-4 text-center border ${ok ? "bg-emerald-950/80 text-emerald-300 border-emerald-800" : "bg-red-950/80 text-red-300 border-red-800"}`;
+  el.classList.remove("hidden");
+  setTimeout(() => el.classList.add("hidden"), 4500);
+}
+function handleSecretTrigger() {
+  appState.secretClickCount++;
+  if (appState.secretClickCount >= 5) {
+    appState.secretClickCount = 0;
+    goToPage("admin-login");
+  }
+  setTimeout(() => appState.secretClickCount = 0, 1800);
+}
+function goToPage(name) {
+  ["login","exam-list","rules","exam","result","admin-login","admin"].forEach(p => {
+    const el = document.getElementById("page-" + p);
+    if (el) el.classList.add("hidden");
+  });
+  document.getElementById("page-" + name).classList.remove("hidden");
+  document.getElementById("calc-fab-btn").classList.toggle("hidden", name !== "exam");
+  if (name === "admin") renderAdmin();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* =====================================================
+   SERVER TIME OFFSET (ANTI BUG)
+===================================================== */
+async function syncServerTime() {
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL + "?action=getServerTime");
+    const data = await res.json();
+    if (data.serverTimestamp) {
+      appState.serverOffset = data.serverTimestamp - Date.now();
+    }
+  } catch(e) {}
+}
+function nowCorrected() {
+  return Date.now() + (appState.serverOffset || 0);
+}
+
+/* =====================================================
+   FETCH CONFIG
+===================================================== */
+async function fetchConfig() {
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_DEPLOYMENT")) return;
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL + "?action=getConfig");
+    const data = await res.json();
+    if (data.globalToken) appState.globalToken = data.globalToken;
+    if (data.exams) appState.exams = data.exams;
+    if (data.whitelistD3) appState.whitelistD3 = data.whitelistD3;
+    if (data.whitelistD4) appState.whitelistD4 = data.whitelistD4;
+    if (data.serverTimestamp) appState.serverOffset = data.serverTimestamp - Date.now();
+  } catch(e) { console.warn(e); }
+}
+
+/* =====================================================
+   LOGIN
+===================================================== */
+async function handleLogin(e) {
+  e.preventDefault();
+  const name = document.getElementById("login-name").value.trim();
+  const nim = document.getElementById("login-nim").value.trim();
+  const token = document.getElementById("login-token").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
+
+  showToast("login-status-msg", "Memverifikasi...", true);
+  await fetchConfig();
+  await syncServerTime();
+
+  const target = (appState.globalToken || "UKOM2026").toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if (token !== target) {
+    showToast("login-status-msg", "Token tidak valid!");
+    return;
+  }
+
+  // Cek whitelist & tentukan program
+  let program = null;
+  if (appState.whitelistD3.includes(nim)) program = "D3_RMIK";
+  else if (appState.whitelistD4.includes(nim)) program = "D4_MIK";
+  else {
+    showToast("login-status-msg", "NIM tidak terdaftar di whitelist D3 maupun D4!");
+    return;
+  }
+
+  appState.currentUser = { name, nim, program, startTime: new Date().toLocaleTimeString("id-ID") };
+  document.getElementById("participant-info-bar").innerText = `${name} (${nim}) • ${program === "D3_RMIK" ? "D3 RMIK" : "D4 MIK"}`;
+  renderExamList();
+  goToPage("exam-list");
+}
+
+/* =====================================================
+   EXAM LIST
+===================================================== */
+function renderExamList() {
+  const container = document.getElementById("exam-list-container");
+  const program = appState.currentUser.program;
+  const activeExams = (appState.exams || []).filter(ex => ex.isActive);
+
+  if (!activeExams.length) {
+    container.innerHTML = `<div class="col-span-full text-center text-slate-500 py-10">Belum ada ujian aktif saat ini.</div>`;
+    return;
+  }
+
+  container.innerHTML = activeExams.map(ex => {
+    const canJoin = (ex.targetProgram === "ALL") ||
+                    (ex.targetProgram === "D3_RMIK" && program === "D3_RMIK") ||
+                    (ex.targetProgram === "D4_MIK" && program === "D4_MIK");
+    const startStr = ex.startTimestamp ? new Date(ex.startTimestamp).toLocaleString("id-ID", {timeZone:"Asia/Jakarta"}) : "-";
+    return `
+    <div class="exam-card bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+      <div class="flex justify-between items-start mb-3">
+        <h3 class="font-bold text-white text-sm leading-tight">${ex.title}</h3>
+        <span class="text-[10px] px-2 py-0.5 rounded-full ${ex.targetProgram==="D3_RMIK"?"bg-emerald-900 text-emerald-300":ex.targetProgram==="D4_MIK"?"bg-amber-900 text-amber-300":"bg-sky-900 text-sky-300"}">${ex.targetProgram.replace("_"," ")}</span>
+      </div>
+      <p class="text-[11px] text-slate-400 mb-3 line-clamp-2">${ex.description || "Tidak ada deskripsi"}</p>
+      <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 mb-4">
+        <div><i class="fa-solid fa-list-ol text-sky-400 mr-1"></i> ${ex.questionCount || 0} Soal</div>
+        <div><i class="fa-regular fa-clock text-sky-400 mr-1"></i> ${ex.durationMinutes || 180} menit</div>
+        <div class="col-span-2"><i class="fa-solid fa-calendar text-sky-400 mr-1"></i> ${startStr} WIB</div>
+      </div>
+      <button onclick="selectExam('${ex.examId}')" ${canJoin ? "" : "disabled"}
+        class="w-full py-2.5 rounded-xl text-xs font-bold transition ${canJoin ? "bg-emerald-600 hover:bg-emerald-500 text-white" : "bg-slate-800 text-slate-500 cursor-not-allowed"}">
+        ${canJoin ? '<i class="fa-solid fa-play mr-1"></i> Masuk Ujian' : "Tidak tersedia untuk program Anda"}
+      </button>
+    </div>`;
+  }).join("");
+}
+
+async function selectExam(examId) {
+  const exam = appState.exams.find(e => e.examId === examId);
+  if (!exam) return;
+
+  // Cek session existing
+  try {
+    const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=loadSession&nim=${encodeURIComponent(appState.currentUser.nim)}&examId=${encodeURIComponent(examId)}`);
+    const sess = await res.json();
+    if (sess.found && sess.status === "finished" && !sess.allowRelogin) {
+      alert("Anda sudah menyelesaikan ujian ini.");
+      return;
+    }
+    if (sess.found && sess.status === "active" && !sess.allowRelogin) {
+      alert("Sesi masih aktif di perangkat lain. Hubungi Admin untuk Unlock.");
+      return;
+    }
+    if (sess.found && sess.allowRelogin) {
+      appState.userAnswers = sess.answers || {};
+      appState.cheatWarnings = sess.violations || 0;
+      appState.sessionId = sess.sessionId;
+    }
+  } catch(e) {}
+
+  appState.currentExam = exam;
+  document.getElementById("rules-exam-title").innerText = exam.title;
+  document.getElementById("rules-verified-info").innerText = `${appState.currentUser.name} (${appState.currentUser.nim})`;
+  document.getElementById("rules-program-badge").innerText = appState.currentUser.program === "D3_RMIK" ? "D3 RMIK" : "D4 MIK";
+  goToPage("rules");
+  startRulesCountdown();
+}
+
+/* =====================================================
+   RULES PAGE - TIMED UNLOCK (NO RELOAD)
+===================================================== */
+function startRulesCountdown() {
+  clearInterval(appState.rulesCountdownInterval);
+  const btn = document.getElementById("btn-start-exam");
+  const label = document.getElementById("btn-start-label");
+  const textEl = document.getElementById("rules-countdown-text");
+
+  const tick = () => {
+    const now = nowCorrected();
+    const start = appState.currentExam.startTimestamp || 0;
+    if (!start || now >= start) {
+      btn.disabled = false;
+      btn.className = "w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow text-sm flex items-center justify-center gap-2 transition";
+      label.innerHTML = '<i class="fa-solid fa-play"></i> Masuk Ruang Ujian';
+      textEl.innerText = "Ujian sudah dapat dimulai";
+      clearInterval(appState.rulesCountdownInterval);
+      return;
+    }
+    const diff = Math.floor((start - now) / 1000);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    textEl.innerText = `Ujian dimulai dalam ${h > 0 ? h + " jam " : ""}${m} menit ${s} detik`;
+    btn.disabled = true;
+    btn.className = "w-full py-3.5 bg-slate-700 text-slate-400 font-bold rounded-xl shadow text-sm flex items-center justify-center gap-2 cursor-not-allowed";
+    label.innerHTML = '<i class="fa-solid fa-lock"></i> Menunggu Waktu Mulai';
+  };
+  tick();
+  appState.rulesCountdownInterval = setInterval(tick, 1000);
+}
+
+/* =====================================================
+   START EXAM
+===================================================== */
+async function startActualExam() {
+  clearInterval(appState.rulesCountdownInterval);
+  const exam = appState.currentExam;
+
+  // Load questions
+  try {
+    const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getExamDetail&examId=${encodeURIComponent(exam.examId)}`);
+    const data = await res.json();
+    if (!data.found || !data.exam.questions || !data.exam.questions.length) {
+      alert("Bank soal belum tersedia untuk ujian ini.");
+      return;
+    }
+    appState.sessionQuestions = prepareSessionQuestions(data.exam.questions);
+  } catch(e) {
+    alert("Gagal memuat soal. Coba lagi.");
+    return;
+  }
+
+  const endTs = (exam.startTimestamp || nowCorrected()) + (exam.durationMinutes * 60 * 1000);
+  appState.currentExam.endTimestamp = endTs;
+  if (!appState.sessionId) appState.sessionId = "s_" + Date.now();
+
+  appState.isExamRunning = true;
+  appState.currentQuestionIndex = 0;
+  appState.cheatWarnings = appState.cheatWarnings || 0;
+
+  document.getElementById("user-display-name").innerText = appState.currentUser.name;
+  document.getElementById("user-display-nim").innerText = `NIM: ${appState.currentUser.nim}`;
+  document.getElementById("user-avatar").innerText = appState.currentUser.name[0].toUpperCase();
+  document.getElementById("cheat-counter").innerText = `${appState.cheatWarnings}/${exam.maxViolations || 3}`;
+
+  goToPage("exam");
+  updateTimer();
+  clearInterval(appState.timerInterval);
+  appState.timerInterval = setInterval(() => {
+    updateTimer();
+    if (appState.timeRemaining <= 0) {
+      clearInterval(appState.timerInterval);
+      forceFinishExam(true);
+    }
+  }, 1000);
+
+  saveProgress(true);
+  renderQuestion();
+  renderGrid();
+}
+
+function prepareSessionQuestions(questions) {
+  const shuffled = [...questions].sort(() => Math.random() - 0.5);
+  return shuffled.map(q => {
+    const opts = (q.options || []).map((t, i) => ({ text: t, isCorrect: i === q.correctIndex }));
+    return { text: q.text, category: q.category || "Umum", options: opts.sort(() => Math.random() - 0.5) };
+  });
+}
+
+function updateTimer() {
+  const end = appState.currentExam.endTimestamp || 0;
+  appState.timeRemaining = Math.max(0, Math.floor((end - nowCorrected()) / 1000));
+  const h = Math.floor(appState.timeRemaining / 3600);
+  const m = Math.floor((appState.timeRemaining % 3600) / 60);
+  const s = appState.timeRemaining % 60;
+  document.getElementById("countdown-timer").innerText = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+/* =====================================================
+   SOAL & JAWABAN + REALTIME SAVE
+===================================================== */
+function renderQuestion() {
+  const idx = appState.currentQuestionIndex;
+  const q = appState.sessionQuestions[idx];
+  if (!q) return;
+  document.getElementById("current-question-num-lbl").innerText = idx + 1;
+  document.getElementById("total-questions-lbl").innerText = appState.sessionQuestions.length;
+  document.getElementById("question-category-lbl").innerText = "Kategori: " + q.category;
+  document.getElementById("question-text").innerText = `${idx+1}. ${q.text}`;
+  const ans = appState.userAnswers[idx] || { optionIndex: null, isDoubtful: false };
+  document.getElementById("doubt-checkbox").checked = !!ans.isDoubtful;
+  const cont = document.getElementById("options-container");
+  cont.innerHTML = "";
+  const labels = ["A","B","C","D","E"];
+  q.options.forEach((opt, i) => {
+    const sel = ans.optionIndex === i;
+    const btn = document.createElement("button");
+    btn.className = `w-full text-left p-3.5 rounded-xl border transition flex items-center space-x-3 text-xs sm:text-sm font-semibold ${sel ? "border-sky-500 bg-sky-950/60 text-white ring-2 ring-sky-500/50" : "border-slate-800 bg-slate-900/80 hover:bg-slate-800 text-slate-200"}`;
+    btn.innerHTML = `<span class="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-bold border ${sel?"bg-sky-500 text-white border-sky-500":"bg-slate-800 border-slate-700 text-slate-400"}">${labels[i]}</span><span class="grow">${opt.text}</span>`;
+    btn.onclick = () => selectOption(i);
+    cont.appendChild(btn);
+  });
+  document.getElementById("btn-prev").disabled = idx === 0;
+  document.getElementById("btn-next").disabled = idx === appState.sessionQuestions.length - 1;
+  document.getElementById("btn-submit").classList.toggle("hidden", idx !== appState.sessionQuestions.length - 1);
+}
+function selectOption(i) {
+  const idx = appState.currentQuestionIndex;
+  if (!appState.userAnswers[idx]) appState.userAnswers[idx] = { optionIndex: null, isDoubtful: false };
+  appState.userAnswers[idx].optionIndex = i;
+  renderQuestion(); renderGrid(); saveProgress();
+}
+function toggleDoubt() {
+  const idx = appState.currentQuestionIndex;
+  if (!appState.userAnswers[idx]) appState.userAnswers[idx] = { optionIndex: null, isDoubtful: false };
+  appState.userAnswers[idx].isDoubtful = document.getElementById("doubt-checkbox").checked;
+  renderGrid(); saveProgress();
+}
+function navigateQuestion(d) {
+  const t = appState.currentQuestionIndex + d;
+  if (t >= 0 && t < appState.sessionQuestions.length) {
+    appState.currentQuestionIndex = t;
+    renderQuestion(); renderGrid();
+  }
+}
+function jumpToQuestion(i) { appState.currentQuestionIndex = i; renderQuestion(); renderGrid(); }
+function renderGrid() {
+  const g = document.getElementById("questions-grid");
+  g.innerHTML = "";
+  appState.sessionQuestions.forEach((_, i) => {
+    const a = appState.userAnswers[i];
+    let cls = "num-btn ";
+    if (a) { if (a.isDoubtful) cls += "ragu "; else if (a.optionIndex !== null) cls += "answered "; }
+    if (i === appState.currentQuestionIndex) cls += "active ";
+    const b = document.createElement("button");
+    b.className = `aspect-square rounded-lg text-center text-xs flex items-center justify-center cursor-pointer ${cls}`;
+    b.innerText = i + 1;
+    b.onclick = () => jumpToQuestion(i);
+    g.appendChild(b);
+  });
+}
+function saveProgress(immediate=false) {
+  if (!GOOGLE_SCRIPT_URL.includes("YOUR_DEPLOYMENT") === false) return;
+  const doSave = () => {
+    const payload = {
+      action: "saveProgress",
+      nim: appState.currentUser.nim,
+      name: appState.currentUser.name,
+      examId: appState.currentExam.examId,
+      status: "active",
+      startTime: appState.currentUser.startTime,
+      endTimestamp: appState.currentExam.endTimestamp,
+      answers: appState.userAnswers,
+      violations: appState.cheatWarnings,
+      allowRelogin: false,
+      sessionId: appState.sessionId,
+      progressCount: Object.values(appState.userAnswers).filter(a => a && a.optionIndex !== null).length,
+      program: appState.currentUser.program
+    };
+    const body = new URLSearchParams(); body.append("payload", JSON.stringify(payload));
+    fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: body.toString() })
+      .then(() => { const ind = document.getElementById("auto-save-indicator"); if(ind){ ind.classList.remove("hidden"); setTimeout(()=>ind.classList.add("hidden"),1800);} });
+  };
+  if (immediate) doSave();
+  else { clearTimeout(appState.saveTimeout); appState.saveTimeout = setTimeout(doSave, 1100); }
+}
+
+/* =====================================================
+   ANTI CHEAT & FINISH
+===================================================== */
+function setupAntiCheat() {
+  document.addEventListener("visibilitychange", () => {
+    if (appState.isExamRunning && document.hidden) {
+      appState.cheatWarnings++;
+      document.getElementById("cheat-counter").innerText = `${appState.cheatWarnings}/${appState.currentExam.maxViolations||3}`;
+      saveProgress(true);
+      if (appState.cheatWarnings >= (appState.currentExam.maxViolations||3)) forceFinishExam(false, true);
+      else {
+        document.getElementById("violation-modal-count").innerText = appState.cheatWarnings;
+        document.getElementById("violation-modal-max").innerText = appState.currentExam.maxViolations||3;
+        document.getElementById("violation-modal").classList.remove("hidden");
+      }
+    }
+  });
+}
+function acknowledgeViolation() { document.getElementById("violation-modal").classList.add("hidden"); }
+function showConfirmSubmit() { document.getElementById("confirm-submit-modal").classList.remove("hidden"); }
+function closeSubmitConfirm() { document.getElementById("confirm-submit-modal").classList.add("hidden"); }
+
+function forceFinishExam(isTimeOut=false, isMaxViol=false) {
+  appState.isExamRunning = false;
+  clearInterval(appState.timerInterval);
+  closeSubmitConfirm();
+  document.getElementById("violation-modal").classList.add("hidden");
+
+  let correct = 0;
+  const cat = {};
+  appState.sessionQuestions.forEach((q, i) => {
+    const c = q.category || "Umum";
+    if (!cat[c]) cat[c] = {correct:0, total:0};
+    cat[c].total++;
+    const a = appState.userAnswers[i];
+    if (a && a.optionIndex !== null && q.options[a.optionIndex].isCorrect) { correct++; cat[c].correct++; }
+  });
+  const total = appState.sessionQuestions.length;
+  const score = total ? ((correct/total)*100).toFixed(2) : 0;
+  const breakdown = Object.keys(cat).map(k => `${k}: ${cat[k].correct}/${cat[k].total}`).join(" | ");
+
+  const sub = {
+    action: "finalSubmit",
+    timestamp: new Date().toLocaleString("id-ID"),
+    fullName: appState.currentUser.name,
+    nim: appState.currentUser.nim,
+    examId: appState.currentExam.examId,
+    finalScore: score,
+    correctAnswers: correct,
+    totalQuestions: total,
+    violations: appState.cheatWarnings,
+    loginTime: appState.currentUser.startTime,
+    categoryAnalysis: breakdown,
+    program: appState.currentUser.program
+  };
+  const body = new URLSearchParams(); body.append("payload", JSON.stringify(sub));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() }).catch(()=>{});
+
+  document.getElementById("res-user-name").innerText = appState.currentUser.name;
+  document.getElementById("res-user-nim").innerText = appState.currentUser.nim;
+  document.getElementById("res-user-time").innerText = sub.timestamp;
+  if (isMaxViol) {
+    document.getElementById("result-main-title").innerText = "Ujian Dikunci";
+    document.getElementById("res-user-status").innerText = "Batas Pelanggaran";
+    document.getElementById("res-user-status").className = "text-red-400 font-bold";
+  } else if (isTimeOut) {
+    document.getElementById("res-user-status").innerText = "Waktu Habis (Auto Submit)";
+  }
+  appState.surveyRatings = {overall:0,ui:0,soal:0,keamanan:0};
+  document.querySelectorAll(".star-rating i").forEach(s => s.classList.remove("active"));
+  goToPage("result");
+}
+
+/* =====================================================
+   SURVEY
+===================================================== */
+function setupStarRatings() {
+  document.querySelectorAll(".star-rating").forEach(c => {
+    const key = c.dataset.rating;
+    c.querySelectorAll("i").forEach(star => {
+      star.onclick = () => {
+        const v = +star.dataset.value;
+        appState.surveyRatings[key] = v;
+        c.querySelectorAll("i").forEach(s => s.classList.toggle("active", +s.dataset.value <= v));
+      };
+    });
+  });
+}
+function submitSurveyAndLogout() {
+  const r = appState.surveyRatings;
+  if (r.overall < 1 || r.ui < 1 || r.soal < 1 || r.keamanan < 1) { alert("Isi semua rating terlebih dahulu."); return; }
+  const payload = {
+    action: "saveSurvey",
+    nim: appState.currentUser?.nim,
+    name: appState.currentUser?.name,
+    examId: appState.currentExam?.examId,
+    ratingOverall: r.overall, ratingUI: r.ui, ratingSoal: r.soal, ratingKeamanan: r.keamanan,
+    saran: document.getElementById("survey-saran").value.trim(),
+    device: navigator.userAgent.slice(0,100)
+  };
+  const body = new URLSearchParams(); body.append("payload", JSON.stringify(payload));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() }).catch(()=>{});
+  logoutParticipant();
+}
+function logoutParticipant() {
+  appState.currentUser = null;
+  appState.currentExam = null;
+  appState.userAnswers = {};
+  goToPage("login");
+}
+
+/* =====================================================
+   ADMIN
+===================================================== */
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const u = document.getElementById("admin-user").value.trim();
+  const p = document.getElementById("admin-pass").value.trim();
+  if (u === ADMIN_CREDENTIALS.username && p === ADMIN_CREDENTIALS.password) goToPage("admin");
+  else showToast("admin-login-status-msg", "Username / Password salah!");
+}
+
+async function renderAdmin() {
+  await fetchConfig();
+  document.getElementById("cfg-global-token").value = appState.globalToken || "";
+  document.getElementById("wl-d3").value = (appState.whitelistD3 || []).join(", ");
+  document.getElementById("wl-d4").value = (appState.whitelistD4 || []).join(", ");
+  renderAdminExamList();
+  populateExamSelects();
+  loadAdminSessions();
+}
+
+function renderAdminExamList() {
+  const box = document.getElementById("admin-exam-list");
+  box.innerHTML = (appState.exams || []).map(ex => `
+    <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 flex justify-between items-center gap-3">
+      <div class="min-w-0">
+        <div class="font-bold text-white text-xs truncate">${ex.title}</div>
+        <div class="text-[10px] text-slate-400">${ex.targetProgram} • ${ex.questionCount||0} soal • ${ex.durationMinutes} mnt • ${ex.isActive ? "Aktif" : "Nonaktif"}</div>
+      </div>
+      <div class="flex gap-1 shrink-0">
+        <button onclick="editExam('${ex.examId}')" class="px-2 py-1 bg-sky-800 text-white text-[10px] rounded">Edit</button>
+        <button onclick="deleteExam('${ex.examId}')" class="px-2 py-1 bg-red-900 text-white text-[10px] rounded">Hapus</button>
+      </div>
+    </div>
+  `).join("") || `<div class="text-slate-500 text-xs">Belum ada ujian.</div>`;
+}
+
+function showCreateExamForm() {
+  document.getElementById("create-exam-form").classList.remove("hidden");
+  document.getElementById("edit-exam-id").value = "";
+  document.getElementById("exam-title").value = "";
+  document.getElementById("exam-desc").value = "";
+  document.getElementById("exam-target").value = "D3_RMIK";
+  document.getElementById("exam-duration").value = 180;
+  document.getElementById("exam-max-viol").value = 3;
+}
+function hideCreateExamForm() { document.getElementById("create-exam-form").classList.add("hidden"); }
+
+function editExam(id) {
+  const ex = appState.exams.find(e => e.examId === id);
+  if (!ex) return;
+  showCreateExamForm();
+  document.getElementById("edit-exam-id").value = id;
+  document.getElementById("exam-title").value = ex.title;
+  document.getElementById("exam-desc").value = ex.description || "";
+  document.getElementById("exam-target").value = ex.targetProgram;
+  document.getElementById("exam-duration").value = ex.durationMinutes;
+  document.getElementById("exam-max-viol").value = ex.maxViolations;
+  if (ex.startTimestamp) {
+    const d = new Date(ex.startTimestamp);
+    document.getElementById("exam-start-date").value = d.toLocaleDateString("en-CA", {timeZone:"Asia/Jakarta"});
+    document.getElementById("exam-start-time").value = d.toLocaleTimeString("en-GB", {timeZone:"Asia/Jakarta", hour:"2-digit", minute:"2-digit"});
+  }
+}
+
+function saveExam() {
+  const id = document.getElementById("edit-exam-id").value || ("exam_" + Date.now());
+  const date = document.getElementById("exam-start-date").value;
+  const time = document.getElementById("exam-start-time").value;
+  let startTs = 0;
+  if (date && time) startTs = new Date(`${date}T${time}:00+07:00`).getTime();
+
+  const exam = {
+    examId: id,
+    title: document.getElementById("exam-title").value.trim(),
+    description: document.getElementById("exam-desc").value.trim(),
+    targetProgram: document.getElementById("exam-target").value,
+    startTimestamp: startTs,
+    durationMinutes: +document.getElementById("exam-duration").value || 180,
+    maxViolations: +document.getElementById("exam-max-viol").value || 3,
+    isActive: true,
+    createdAt: new Date().toISOString()
+  };
+  if (!exam.title) return showToast("admin-toast-msg", "Judul wajib diisi");
+
+  const body = new URLSearchParams();
+  body.append("payload", JSON.stringify({ action: "saveExam", exam }));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() })
+    .then(() => {
+      showToast("admin-toast-msg", "Ujian disimpan!", true);
+      hideCreateExamForm();
+      setTimeout(() => { fetchConfig().then(renderAdminExamList); }, 800);
+    });
+}
+
+function deleteExam(id) {
+  if (!confirm("Hapus ujian ini beserta bank soalnya?")) return;
+  const body = new URLSearchParams();
+  body.append("payload", JSON.stringify({ action: "deleteExam", examId: id }));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() })
+    .then(() => { showToast("admin-toast-msg", "Ujian dihapus", true); setTimeout(renderAdmin, 700); });
+}
+
+function saveGlobalConfig() {
+  appState.globalToken = document.getElementById("cfg-global-token").value.trim().toUpperCase() || "UKOM2026";
+  const body = new URLSearchParams();
+  body.append("payload", JSON.stringify({ action: "saveConfig", config: { globalToken: appState.globalToken } }));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() });
+  showToast("admin-toast-msg", "Token global disimpan", true);
+}
+
+function saveWhitelist(prog) {
+  const raw = document.getElementById(prog === "D3" ? "wl-d3" : "wl-d4").value;
+  const list = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  const body = new URLSearchParams();
+  body.append("payload", JSON.stringify({ action: "saveWhitelist", program: prog, list }));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() });
+  showToast("admin-toast-msg", `Whitelist ${prog} disimpan (${list.length} NIM)`, true);
+  if (prog === "D3") appState.whitelistD3 = list; else appState.whitelistD4 = list;
+}
+
+function populateExamSelects() {
+  const opts = (appState.exams || []).map(e => `<option value="${e.examId}">${e.title}</option>`).join("");
+  document.getElementById("qbank-exam-select").innerHTML = opts;
+  document.getElementById("session-exam-filter").innerHTML = `<option value="">Semua Ujian</option>` + opts;
+}
+
+async function loadQuestionBank() {
+  const id = document.getElementById("qbank-exam-select").value;
+  if (!id) return;
+  try {
+    const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getExamDetail&examId=${encodeURIComponent(id)}`);
+    const data = await res.json();
+    const qs = data.exam?.questions || [];
+    document.getElementById("bank-soal-preview").innerHTML = qs.map((q,i) => 
+      `<div class="p-2 bg-slate-900 rounded border border-slate-800">${i+1}. ${q.text.slice(0,80)}... <span class="text-sky-400">[${q.category}]</span></div>`
+    ).join("") || "<div class='text-slate-500'>Belum ada soal</div>";
+  } catch(e) {}
+}
+
+function processAIImport() {
+  const examId = document.getElementById("qbank-exam-select").value;
+  if (!examId) return showToast("admin-toast-msg", "Pilih ujian dulu");
+  const text = document.getElementById("ai-import-area").value.trim();
+  if (!text) return;
+  const questions = parseQuestions(text);
+  if (!questions.length) return showToast("admin-toast-msg", "Format soal tidak terdeteksi");
+  const body = new URLSearchParams();
+  body.append("payload", JSON.stringify({ action: "saveQuestions", examId, questions }));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() })
+    .then(() => {
+      showToast("admin-toast-msg", `${questions.length} soal berhasil di-inject!`, true);
+      document.getElementById("ai-import-area").value = "";
+      setTimeout(loadQuestionBank, 600);
+    });
+}
+function clearQuestionBank() {
+  const examId = document.getElementById("qbank-exam-select").value;
+  if (!examId || !confirm("Hapus SEMUA soal ujian ini secara permanen?")) return;
+  const body = new URLSearchParams();
+  body.append("payload", JSON.stringify({ action: "clearQuestions", examId }));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() })
+    .then(() => { showToast("admin-toast-msg", "Soal dihapus permanen", true); loadQuestionBank(); });
+}
+
+function parseQuestions(text) {
+  const cleaned = text.replace(/\r/g, "");
+  const blocks = cleaned.split(/(?=\n\s*\d+[\.\)])|\n\s*\n+/);
+  const result = [];
+  blocks.forEach(block => {
+    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+    let qText = "", opts = {}, key = -1, cat = "Umum";
+    lines.forEach(line => {
+      const om = line.match(/^\(?([A-E])[\.\)\:\-]\s*(.*)/i);
+      const km = line.match(/^Kunci\s*:?\s*([A-E])/i);
+      const cm = line.match(/^Kategori\s*:?\s*(.*)/i);
+      if (om) opts[om[1].toUpperCase()] = om[2].trim();
+      else if (km) key = "ABCDE".indexOf(km[1].toUpperCase());
+      else if (cm) cat = cm[1].trim() || "Umum";
+      else qText += (qText ? " " : "") + line.replace(/^\d+[\.\)\:\-]\s*/, "");
+    });
+    const options = ["A","B","C","D","E"].map(l => opts[l] || "-");
+    if (qText && options.filter(o => o !== "-").length >= 2) {
+      result.push({ text: qText, options, correctIndex: key >= 0 ? key : 0, category: cat });
+    }
+  });
+  return result;
+}
+
+async function loadAdminSessions(show=false) {
+  const filter = document.getElementById("session-exam-filter").value;
+  try {
+    const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getSessions${filter ? "&examId="+filter : ""}`);
+    const data = await res.json();
+    const tbody = document.getElementById("admin-sessions-tbody");
+    if (!data.sessions || !data.sessions.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-500">Belum ada sesi</td></tr>`;
+      return;
+    }
+    const now = nowCorrected();
+    tbody.innerHTML = data.sessions.map(s => {
+      const rem = Math.max(0, Math.floor(((s.endTimestamp||0) - now)/1000));
+      const mm = Math.floor(rem/60), ss = rem%60;
+      return `<tr>
+        <td class="p-2 font-mono text-sky-400">${s.nim}</td>
+        <td class="p-2 text-white">${s.name||"-"}</td>
+        <td class="p-2 text-[10px]">${s.examId}</td>
+        <td class="p-2 ${s.status==="active"?"text-emerald-400":"text-slate-400"}">${s.status}</td>
+        <td class="p-2">${s.progressCount||0}</td>
+        <td class="p-2 font-mono">${mm}:${String(ss).padStart(2,"0")}</td>
+        <td class="p-2 space-x-1">
+          <button onclick="adminAct('unlock','${s.nim}','${s.examId}')" class="px-1.5 py-0.5 bg-amber-700 text-white text-[10px] rounded">Unlock</button>
+          <button onclick="adminAct('addTime','${s.nim}','${s.examId}',5)" class="px-1.5 py-0.5 bg-sky-700 text-white text-[10px] rounded">+5m</button>
+          <button onclick="adminAct('forceFinish','${s.nim}','${s.examId}')" class="px-1.5 py-0.5 bg-red-800 text-white text-[10px] rounded">Force</button>
+        </td>
+      </tr>`;
+    }).join("");
+    if (show) showToast("admin-toast-msg", "Sesi dimuat", true);
+  } catch(e) { if (show) showToast("admin-toast-msg", "Gagal muat sesi"); }
+}
+
+function adminAct(type, nim, examId, minutes) {
+  const payload = { action: "adminAction", type, nim, examId };
+  if (minutes) payload.minutes = minutes;
+  const body = new URLSearchParams(); body.append("payload", JSON.stringify(payload));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() })
+    .then(() => { showToast("admin-toast-msg", "Aksi terkirim", true); setTimeout(loadAdminSessions, 1000); });
+}
+
+function hardResetSessions() {
+  if (!confirm("HARD RESET semua sesi? Data progress akan hilang permanen.")) return;
+  const filter = document.getElementById("session-exam-filter").value;
+  const body = new URLSearchParams();
+  body.append("payload", JSON.stringify({ action: "hardResetSessions", examId: filter || null }));
+  fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: body.toString() })
+    .then(() => { showToast("admin-toast-msg", "Hard reset berhasil", true); loadAdminSessions(); });
+}
+
+/* =====================================================
+   CALCULATOR
+===================================================== */
+let calcExpr = "";
+function openCalculator() { document.getElementById("calculator-modal").classList.remove("hidden"); }
+function closeCalculator() { document.getElementById("calculator-modal").classList.add("hidden"); }
+function calcAppend(v) { if (calcExpr==="0" && v!==".") calcExpr=v; else calcExpr+=v; document.getElementById("calc-display").innerText=calcExpr; }
+function calcClear() { calcExpr=""; document.getElementById("calc-display").innerText="0"; }
+function calcDelete() { calcExpr = calcExpr.length<=1 ? "0" : calcExpr.slice(0,-1); document.getElementById("calc-display").innerText=calcExpr; }
+function calcCalculate() {
+  try {
+    const r = eval(calcExpr.replace(/×/g,"*").replace(/÷/g,"/"));
+    document.getElementById("calc-display").innerText = r;
+    calcExpr = String(r);
+  } catch(e) { document.getElementById("calc-display").innerText="Error"; calcExpr=""; }
+}
+</script>
+</body>
+</html>
