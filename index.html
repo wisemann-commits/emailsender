@@ -5,84 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Webinar Email Sender</title>
   <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text2: #64748b;
+      --border: #cbd5e1;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --header-bg: linear-gradient(135deg, #0f172a, #1e40af);
+    }
+    body.dark {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f1f5f9;
+      --text2: #94a3b8;
+      --border: #334155;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --header-bg: linear-gradient(135deg, #020617, #1e3a8a);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f1f5f9;
-      color: #1e293b;
+      background: var(--bg);
+      color: var(--text);
       padding: 24px;
       line-height: 1.5;
+      transition: background 0.3s, color 0.3s;
     }
     .container {
-      max-width: 800px;
+      max-width: 840px;
       margin: 0 auto;
-      background: white;
+      background: var(--card);
       border-radius: 16px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
       overflow: hidden;
     }
     .header {
-      background: linear-gradient(135deg, #0f172a, #1e40af);
+      background: var(--header-bg);
       color: white;
-      padding: 28px 32px;
+      padding: 24px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .header h1 { font-size: 22px; font-weight: 600; }
-    .header p { opacity: 0.85; margin-top: 6px; font-size: 14px; }
-    .content { padding: 32px; }
+    .header h1 { font-size: 21px; font-weight: 600; }
+    .header p { opacity: 0.85; margin-top: 4px; font-size: 13px; }
+    .theme-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .content { padding: 28px; }
     label {
       display: block;
       font-weight: 600;
       font-size: 14px;
-      margin-bottom: 8px;
-      color: #334155;
+      margin-bottom: 7px;
     }
-    .form-group { margin-bottom: 20px; }
-    textarea, input[type="text"], input[type="url"] {
+    .form-group { margin-bottom: 18px; }
+    textarea, input[type="text"], input[type="url"], input[type="file"] {
       width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #cbd5e1;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
       border-radius: 10px;
       font-size: 14px;
+      background: var(--card);
+      color: var(--text);
     }
     textarea:focus, input:focus {
       outline: none;
-      border-color: #3b82f6;
+      border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
     }
-    textarea { min-height: 110px; resize: vertical; font-family: inherit; }
-    .hint { font-size: 12px; color: #64748b; margin-top: 6px; }
-    .btn-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 8px;
-    }
+    textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+    .hint { font-size: 12px; color: var(--text2); margin-top: 5px; }
+    .btn-group { display: flex; gap: 12px; margin-top: 6px; }
     .btn {
       flex: 1;
-      padding: 14px;
+      padding: 13px;
       border-radius: 10px;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       border: none;
-      transition: all 0.2s;
     }
-    .btn-preview {
-      background: #e2e8f0;
-      color: #1e293b;
-    }
-    .btn-preview:hover { background: #cbd5e1; }
-    .btn-send {
-      background: #2563eb;
-      color: white;
-    }
-    .btn-send:hover { background: #1d4ed8; }
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .btn-preview { background: var(--border); color: var(--text); }
+    .btn-send { background: var(--primary); color: white; }
+    .btn-send:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .status {
-      margin-top: 20px;
-      padding: 16px;
+      margin-top: 18px;
+      padding: 14px;
       border-radius: 10px;
       display: none;
       font-size: 14px;
@@ -90,12 +109,15 @@
     .status.success { background: #dcfce7; color: #166534; display: block; }
     .status.error { background: #fee2e2; color: #991b1b; display: block; }
     .status.info { background: #e0f2fe; color: #075985; display: block; }
+    body.dark .status.success { background: #14532d; color: #bbf7d0; }
+    body.dark .status.error { background: #7f1d1d; color: #fecaca; }
+    body.dark .status.info { background: #0c4a6e; color: #bae6fd; }
 
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.6);
       z-index: 100;
       align-items: center;
       justify-content: center;
@@ -103,7 +125,7 @@
     }
     .modal.active { display: flex; }
     .modal-content {
-      background: white;
+      background: var(--card);
       width: 100%;
       max-width: 720px;
       max-height: 90vh;
@@ -113,97 +135,103 @@
       flex-direction: column;
     }
     .modal-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .modal-body {
-      padding: 0;
-      overflow: auto;
-      flex: 1;
-      background: #f8fafc;
-    }
-    .modal-body iframe {
-      width: 100%;
-      height: 70vh;
-      border: none;
-    }
+    .modal-body { flex: 1; overflow: auto; }
+    .modal-body iframe { width: 100%; height: 70vh; border: none; }
     .close-btn {
       background: none;
       border: none;
       font-size: 22px;
       cursor: pointer;
-      color: #64748b;
+      color: var(--text2);
+    }
+    .logo-preview {
+      margin-top: 8px;
+      max-height: 55px;
+      border-radius: 6px;
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>Webinar Email Sender</h1>
-      <p>Personalisasi + Logo + Sertifikat Otomatis</p>
+      <div>
+        <h1>Webinar Email Sender</h1>
+        <p>Auto Sertifikat + Upload Logo + Simpan Pengaturan</p>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()">🌙 / ☀️</button>
     </div>
 
     <div class="content">
       <div class="form-group">
         <label>Daftar Peserta (Nama|Email)</label>
         <textarea id="participants" placeholder="Budi Santoso|budi@email.com
-Siti Nurhaliza|siti@email.com
-Andi Wijaya Putra|andi@email.com"></textarea>
-        <div class="hint">Format: Nama Lengkap|Email (satu baris satu orang)</div>
+Siti Nurhaliza|siti@email.com"></textarea>
+        <div class="hint">Format: Nama Lengkap|Email</div>
       </div>
 
       <div class="form-group">
         <label>Subject Email</label>
-        <input type="text" id="subject" placeholder="Sertifikat & Rekaman Webinar - [Judul]">
+        <input type="text" id="subject" placeholder="Sertifikat & Rekaman Webinar">
       </div>
 
       <div class="form-group">
-        <label>URL Logo Perusahaan (opsional)</label>
-        <input type="url" id="logoUrl" placeholder="https://...">
+        <label>Nama Pengirim (Display Name)</label>
+        <input type="text" id="senderName" value="Panitia Webinar">
       </div>
 
       <div class="form-group">
-        <label>Link Materi / Dokumen (sama untuk semua)</label>
-        <input type="url" id="docLink" placeholder="https://drive.google.com/...">
+        <label>Upload Logo (PNG / JPG)</label>
+        <input type="file" id="logoFile" accept="image/png,image/jpeg,image/jpg">
+        <img id="logoPreview" class="logo-preview" alt="Preview Logo">
       </div>
 
       <div class="form-group">
-        <label>Link Rekaman Zoom (sama untuk semua)</label>
+        <label>Folder ID Sertifikat</label>
+        <input type="text" id="folderId" placeholder="1aBcDeFgHiJkLmNoPqRsTuVwXyZ">
+        <div class="hint">Buka folder di Drive → copy ID setelah /folders/</div>
+      </div>
+
+      <div class="form-group">
+        <label>Link Rekaman Zoom</label>
         <input type="url" id="zoomLink" placeholder="https://...">
       </div>
 
       <div class="form-group">
+        <label>Link Materi / Dokumen</label>
+        <input type="url" id="docLink" placeholder="https://drive.google.com/...">
+      </div>
+
+      <div class="form-group">
         <label>Template HTML Email</label>
-        <textarea id="htmlBody" style="min-height: 280px; font-family: monospace; font-size: 13px;">
+        <textarea id="htmlBody" style="min-height: 260px; font-family: monospace; font-size: 13px;">
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:30px 0;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-          
-          <!-- Logo -->
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
           <tr>
             <td style="padding:30px 40px 20px;text-align:center;">
               <img src="{{LOGO}}" alt="Logo" style="max-height:60px;max-width:200px;">
             </td>
           </tr>
-
-          <!-- Isi -->
           <tr>
             <td style="padding:10px 40px 30px;">
               <h2 style="color:#0f172a;margin:0 0 16px;font-size:22px;">Halo {{Nama}},</h2>
-              
-              <p style="color:#334155;font-size:15px;line-height:1.6;margin:0 0 16px;">
-                Terima kasih sudah mengikuti webinar kami. Berikut kami kirimkan <strong>sertifikat</strong>, <strong>rekaman</strong>, dan <strong>materi</strong>.
+              <p style="color:#334155;font-size:15px;line-height:1.6;margin:0 0 20px;">
+                Terima kasih sudah mengikuti webinar kami. Berikut kami kirimkan sertifikat, rekaman, dan materi.
               </p>
 
               <!-- Tombol Sertifikat -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" id="sertifikat-button" style="margin:16px 0;">
                 <tr>
                   <td align="center">
                     <a href="{{SERTIFIKAT}}" style="display:inline-block;background:#059669;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;font-size:15px;">
@@ -214,7 +242,7 @@ Andi Wijaya Putra|andi@email.com"></textarea>
               </table>
 
               <!-- Tombol Zoom -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin:12px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" id="zoom-button" style="margin:12px 0;">
                 <tr>
                   <td align="center">
                     <a href="{{ZOOM_LINK}}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;font-size:15px;">
@@ -224,7 +252,8 @@ Andi Wijaya Putra|andi@email.com"></textarea>
                 </tr>
               </table>
 
-              <p style="color:#334155;font-size:15px;line-height:1.6;margin-top:24px;">
+              <!-- Materi -->
+              <p id="materi-section" style="color:#334155;font-size:15px;line-height:1.6;margin-top:24px;">
                 <strong>Materi / Dokumen:</strong><br>
                 <a href="{{DOC_LINK}}" style="color:#2563eb;">Download Materi di sini</a>
               </p>
@@ -243,9 +272,6 @@ Andi Wijaya Putra|andi@email.com"></textarea>
 </body>
 </html>
         </textarea>
-        <div class="hint">
-          Placeholder yang tersedia: <code>{{Nama}}</code>, <code>{{LOGO}}</code>, <code>{{SERTIFIKAT}}</code>, <code>{{ZOOM_LINK}}</code>, <code>{{DOC_LINK}}</code>
-        </div>
       </div>
 
       <div class="btn-group">
@@ -257,7 +283,6 @@ Andi Wijaya Putra|andi@email.com"></textarea>
     </div>
   </div>
 
-  <!-- Preview Modal -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -271,11 +296,58 @@ Andi Wijaya Putra|andi@email.com"></textarea>
   </div>
 
   <script>
-    // ================== PENGATURAN ==================
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaFMG845nOCrNbgw9Z8cuna341tNwnkIgWmuBCmsn3CAUuYNvuVu_fFWLd0rhGqajD/exec";
-    const FOLDER_ID = "PASTE_FOLDER_ID_SERTIFIKAT_DISINI";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwb96EdSbXu3za-gJNUGL9J6DFVm4mWXrxT-RUAjuY_xhcEbt8gnvVHBL2U8rG-BBF/exec";
     const SECRET = "webinar2026";
-    // ================================================
+
+    // ===== Simpan & Load Pengaturan =====
+    const saveFields = ["subject", "senderName", "folderId", "zoomLink", "docLink"];
+
+    function saveSettings() {
+      saveFields.forEach(id => {
+        localStorage.setItem("wes_" + id, document.getElementById(id).value);
+      });
+    }
+
+    function loadSettings() {
+      saveFields.forEach(id => {
+        const val = localStorage.getItem("wes_" + id);
+        if (val) document.getElementById(id).value = val;
+      });
+    }
+
+    // Auto save setiap kali input berubah
+    saveFields.forEach(id => {
+      document.getElementById(id).addEventListener("change", saveSettings);
+      document.getElementById(id).addEventListener("blur", saveSettings);
+    });
+
+    // Load saat buka halaman
+    loadSettings();
+
+    // Night Mode
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    }
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+    }
+
+    // Preview logo
+    document.getElementById("logoFile").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById("logoPreview");
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          preview.src = ev.target.result;
+          preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.style.display = "none";
+      }
+    });
 
     function getParticipants() {
       const raw = document.getElementById('participants').value.trim();
@@ -284,38 +356,49 @@ Andi Wijaya Putra|andi@email.com"></textarea>
         .filter(l => l.trim())
         .map(line => {
           const parts = line.split('|').map(p => p.trim());
-          return {
-            nama: parts[0] || "Peserta",
-            email: parts[1] || ""
-          };
+          return { nama: parts[0] || "Peserta", email: parts[1] || "" };
         });
     }
 
-    function buildHtml(nama = "Budi Santoso") {
+    function getLogoBase64() {
+      return new Promise(resolve => {
+        const file = document.getElementById("logoFile").files[0];
+        if (!file) return resolve({ base64: null, mime: null });
+        const reader = new FileReader();
+        reader.onload = e => resolve({ base64: e.target.result, mime: file.type });
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function buildHtml(nama = "Budi Santoso") {
       let html = document.getElementById('htmlBody').value;
-      const logo = document.getElementById('logoUrl').value.trim();
       const doc = document.getElementById('docLink').value.trim();
       const zoom = document.getElementById('zoomLink').value.trim();
+      const logoData = await getLogoBase64();
 
       html = html
         .replace(/{{Nama}}/gi, nama)
-        .replace(/{{nama}}/gi, nama)
-        .replace(/{{LOGO}}/g, logo || "")
         .replace(/{{DOC_LINK}}/g, doc || "#")
         .replace(/{{ZOOM_LINK}}/g, zoom || "#")
-        .replace(/{{SERTIFIKAT}}/g, "#"); // preview tidak real
+        .replace(/{{SERTIFIKAT}}/g, "#");
 
-      if (!logo) {
+      if (logoData.base64) {
+        html = html.replace(/src=["']{{LOGO}}["']/gi, `src="${logoData.base64}"`);
+      } else {
         html = html.replace(/<img[^>]*src=["']{{LOGO}}["'][^>]*>/gi, "");
       }
+
+      // Sembunyikan tombol di preview juga
+      if (!zoom) html = html.replace(/<table[^>]*id=["']zoom-button["'][\s\S]*?<\/table>/gi, "");
+      if (!doc) html = html.replace(/<p[^>]*id=["']materi-section["'][\s\S]*?<\/p>/gi, "");
+
       return html;
     }
 
-    function previewEmail() {
+    async function previewEmail() {
       const participants = getParticipants();
       const sampleName = participants.length > 0 ? participants[0].nama : "Budi Santoso";
-      const html = buildHtml(sampleName);
-      
+      const html = await buildHtml(sampleName);
       document.getElementById('previewFrame').srcdoc = html;
       document.getElementById('previewModal').classList.add('active');
     }
@@ -337,39 +420,41 @@ Andi Wijaya Putra|andi@email.com"></textarea>
         return;
       }
 
-      if (APPS_SCRIPT_URL.includes("PASTE_URL") || FOLDER_ID.includes("PASTE_FOLDER")) {
-        showStatus("Belum diisi APPS_SCRIPT_URL atau FOLDER_ID", "error");
+      if (APPS_SCRIPT_URL.includes("PASTE_URL")) {
+        showStatus("Belum diisi APPS_SCRIPT_URL", "error");
         return;
       }
+
+      saveSettings(); // pastikan tersimpan
 
       const btn = document.getElementById('btnSend');
       btn.disabled = true;
       btn.innerText = "Sedang mengirim...";
+      showStatus(`Mengirim ke ${participants.length} peserta...`, "info");
 
-      showStatus(`Mengirim ke ${participants.length} peserta... (mohon tunggu)`, "info");
+      const logoData = await getLogoBase64();
 
       const payload = {
         secret: SECRET,
-        participants: participants,
-        subject: subject,
+        participants,
+        subject,
         htmlBody: document.getElementById('htmlBody').value,
-        logoUrl: document.getElementById('logoUrl').value.trim(),
         docLink: document.getElementById('docLink').value.trim(),
         zoomLink: document.getElementById('zoomLink').value.trim(),
-        folderId: FOLDER_ID
+        folderId: document.getElementById('folderId').value.trim(),
+        senderName: document.getElementById('senderName').value.trim() || "Panitia Webinar",
+        logoBase64: logoData.base64,
+        logoMimeType: logoData.mime
       };
 
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
 
         const result = await res.json();
-
         btn.disabled = false;
         btn.innerText = "Kirim ke Semua Peserta";
 
@@ -379,7 +464,7 @@ Andi Wijaya Putra|andi@email.com"></textarea>
         }
 
         let msg = `Berhasil: ${result.success} | Gagal: ${result.failed}`;
-        if (result.errors && result.errors.length) {
+        if (result.errors?.length) {
           msg += "<br><br><b>Detail:</b><br>" + result.errors.join("<br>");
         }
         showStatus(msg, result.failed > 0 ? "error" : "success");
@@ -397,8 +482,8 @@ Andi Wijaya Putra|andi@email.com"></textarea>
       el.className = "status " + type;
     }
 
-    document.getElementById('previewModal').addEventListener('click', function(e) {
-      if (e.target === this) closePreview();
+    document.getElementById('previewModal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closePreview();
     });
   </script>
 </body>
